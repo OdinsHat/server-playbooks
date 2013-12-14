@@ -18,7 +18,6 @@
       tags: common
       with_items:
         - php5
-        - apache2
         - mysql-server
         - mysql-client
         - php5-mysql
@@ -32,7 +31,8 @@
         - vim-nox
         - vim-scripts
         - exuberant-ctags
-
+        - nginx
+        - php-fpm
 
     ##
     # Message of the day explaining server is under control of Ansible.
@@ -60,7 +60,7 @@
     # PHP Setup.
     #
     - name: PHP | Configuration file, php.ini
-      action: template src=templates/etc-php5-apache2-php-ini.j2 dest=/etc/php5/apache2/php.ini
+      action: template src=templates/etc-php5-fpm-php-ini.j2 dest=/etc/php5/fpm/php.ini
       tags: common
 
     - name: APC | Cache configuration file, apc.ini
@@ -75,25 +75,6 @@
       tags: common
 
     - include: ../common-tasks/mysql-secure.yml
-
-    ##
-    # Apache2 setup.
-    #
-    - name: Apache | Enable some required modules
-      action: command a2enmod rewrite vhost_alias
-      tags: common
-
-    - name: Apache | Configuration file for our site
-      action: template src=templates/etc-apache2-sites-available-devserver.j2 dest=/etc/apache2/sites-available/devserver
-      tags: common
-
-    - name: Apache | Disable the default site
-      action: command a2dissite default
-      tags: common
-
-    - name: Apache | Enable our new site
-      action: command a2ensite devserver
-      tags: common
 
     ##
     # FTP server setup.
@@ -177,8 +158,12 @@
     ##
     # Restart services
     #
-    - name: Restart Apache
-      action: service name=apache2 state=restarted
+    - name: Restart phpfpm
+      action: service name=php-fpm state=restarted
+      tags: common
+    
+    - name: Restart nginx
+      action: service name=nginx state=restarted
       tags: common
 
     - name: Restart MySQL
