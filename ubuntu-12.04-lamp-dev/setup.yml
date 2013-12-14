@@ -29,12 +29,31 @@
         - sendmail
         - unzip
         - python-mysqldb
+        - vim-nox
+        - vim-scripts
+        - exuberant-ctags
+
 
     ##
     # Message of the day explaining server is under control of Ansible.
     #
     - name: General | Message of the day explaining server is under Ansible control.
       action: copy src=files/etc-update-motd-d-95-ansible dest=/etc/update-motd.d/95-ansible mode=755
+      tags: common
+
+    ##
+    # vim Setup
+    #
+    - name: VIM | Copy vimrc
+      action: template src=templates/root-vimrc.j2 dest=/root/.vimrc
+      tags: common
+
+    - name: VIM | Get Vundle repo
+      action: git repo=https://github.com/gmarik/vundle.git dest=/root/.vim/bundle/vundle
+      tags: common
+
+    - name: VIM | Install Bundles
+      action: command vim +BundleInstall +qall
       tags: common
 
     ##
